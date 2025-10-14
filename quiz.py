@@ -8,6 +8,23 @@ import asyncio
 from quiz_questions import quiz_questions
 import json, os
 
+from flask import Flask
+import threading
+
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Bot is awake!"
+
+def run():
+    app.run(host='0.0.0.0', port=8080)
+
+def keep_alive():
+    t = threading.Thread(target=run)
+    t.start()
+
+
 SCORE_FILE = "scores.json"
 
 def load_scores():
@@ -311,4 +328,5 @@ async def score(ctx):
     await ctx.send(embed=embed)
 import os
 bot.run(os.getenv("DISCORD_TOKEN"))
+
 
