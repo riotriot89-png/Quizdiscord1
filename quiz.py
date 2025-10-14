@@ -327,6 +327,9 @@ async def score(ctx):
 
     await ctx.send(embed=embed)
 import os
+keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
+add keep_alive for Render
+
 
 
