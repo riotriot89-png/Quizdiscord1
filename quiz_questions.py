@@ -175,7 +175,7 @@ quiz_questions = [
 {"category": "Khoa học", "question": "Đơn vị đo năng lượng trong hệ SI là gì?", "options": ["A) Pascal", "B) Joule", "C) Newton", "D) Watt"], "answer": "B"},
 {"category": "Khoa học", "question": "Hành tinh nào gần Mặt Trời nhất?", "options": ["A) Sao Kim", "B) Sao Thủy", "C) Sao Hỏa", "D) Sao Mộc"], "answer": "B"},
 {"category": "Khoa học", "question": "Loài nào được xem là động vật có vú lớn nhất trên Trái Đất?", "options": ["A) Cá voi xanh", "B) Voi châu Phi", "C) Cá mập voi", "D) Hà mã"], "answer": "A"},
-{"category": "Khoa học", "question": "Cái gì giữ cho các hành tinh quay quanh Mặt Trời?", "options": ["A) Lực hấp dẫn", "B) Lực đẩy", "C) Từ trường", "D) Sóng âm"], "answer": "A"}
+{"category": "Khoa học", "question": "Cái gì giữ cho các hành tinh quay quanh Mặt Trời?", "options": ["A) Lực hấp dẫn", "B) Lực đẩy", "C) Từ trường", "D) Sóng âm"], "answer": "A"},
 {"category": "Địa lý", "question": "Quốc gia nào có dân số lớn nhất thế giới tính đến năm 2025?", "options": ["A) Ấn Độ", "B) Trung Quốc", "C) Mỹ", "D) Indonesia"], "answer": "A"},
 {"category": "Địa lý", "question": "Dãy núi Andes nằm trên châu lục nào?", "options": ["A) Bắc Mỹ", "B) Nam Mỹ", "C) Châu Á", "D) Châu Âu"], "answer": "B"},
 {"category": "Địa lý", "question": "Sa mạc Atacama nằm ở quốc gia nào?", "options": ["A) Chile", "B) Peru", "C) Argentina", "D) Bolivia"], "answer": "A"},
