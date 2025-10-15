@@ -274,22 +274,23 @@ async def quiz(ctx):
         await ctx.send("🎯 Hết câu hỏi rồi! Hãy reset bot hoặc thêm câu hỏi mới nhé.")
         return
 
-    quiz = random.choice(remaining_questions)
-    asked_questions.add(quiz["question"])  # Đánh dấu đã hỏi
+    question_data = random.choice(remaining_questions)
+    asked_questions.add(question_data["question"]) # Đánh dấu đã hỏi
 
     embed = discord.Embed(
         title="🧠 Câu hỏi kiến thức",
-        description=quiz["question"],
+        description=question_data["question"],
         color=random.randint(0, 0xFFFFFF)
     )
-    embed.add_field(name="Các lựa chọn", value="\n".join(quiz["options"]), inline=False)
+    embed.add_field(name="Các lựa chọn", value="\n".join(question_data["options"]), inline=False)
     embed.set_footer(text="⏰ Bạn có 20 giây để trả lời!")
-
+    
     msg = await ctx.send(embed=embed)
-    view = QuizView(quiz, ctx, msg)
+    view = QuizView(question_data, ctx, msg)
     await msg.edit(view=view)
     # Chờ câu hỏi kết thúc
     await view.wait()
+
 
     
     global no_answer_streak
@@ -350,6 +351,7 @@ import os
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
 #add keep_alive for Render
+
 
 
 
