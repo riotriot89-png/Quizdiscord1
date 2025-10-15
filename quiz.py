@@ -304,7 +304,7 @@ async def quiz(ctx):
         no_answer_streak = 0
         return
 
-await quiz(ctx)
+    await quiz(ctx)
 
 
 
@@ -350,6 +350,7 @@ import os
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
 #add keep_alive for Render
+
 
 
 
