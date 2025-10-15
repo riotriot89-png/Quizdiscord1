@@ -55,6 +55,7 @@ player_scores = load_scores()
 # ======================
 asked_questions = set()
 is_quiz_running = False
+no_answer_streak = 0
 
 
 # ======================
@@ -287,6 +288,25 @@ async def quiz(ctx):
     msg = await ctx.send(embed=embed)
     view = QuizView(quiz, ctx, msg)
     await msg.edit(view=view)
+    # Chờ câu hỏi kết thúc
+    while is_quiz_running:
+        await asyncio.sleep(1)
+    
+    global no_answer_streak
+    if not view.answered_users:
+        no_answer_streak += 1
+    else:
+        no_answer_streak = 0
+    
+    if no_answer_streak >= 4:
+        await ctx.send("🚫 Không ai trả lời trong 4 câu liên tiếp — kết thúc trò chơi!")
+        is_quiz_running = False
+        no_answer_streak = 0
+        return
+
+await quiz(ctx)
+
+
 
 # ======================
 # Lệnh xem bảng điểm
@@ -330,6 +350,7 @@ import os
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
 #add keep_alive for Render
+
 
 
 
