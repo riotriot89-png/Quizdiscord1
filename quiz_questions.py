@@ -304,7 +304,7 @@ quiz_questions = [
 {"category": "Lịch sử thế giới", "question": "Chiến tranh thế giới thứ nhất bắt đầu năm nào?", "options": ["A) 1912", "B) 1914", "C) 1918", "D) 1920"], "answer": "B"},
 {"category": "Lịch sử thế giới", "question": "Cuộc cách mạng Pháp bắt đầu năm nào?", "options": ["A) 1776", "B) 1789", "C) 1799", "D) 1804"], "answer": "B"},
 {"category": "Lịch sử thế giới", "question": "Ai là lãnh đạo Liên Xô trong Chiến tranh Lạnh?", "options": ["A) Stalin", "B) Lenin", "C) Gorbachev", "D) Khrushchev"], "answer": "C"},
-{"category": "Lịch sử thế giới", "question": "Nobel Hòa bình đầu tiên được trao năm nào?", "options": ["A) 1895", "B) 1901", "C) 1910", "D) 1920"], "answer": "B"}
+{"category": "Lịch sử thế giới", "question": "Nobel Hòa bình đầu tiên được trao năm nào?", "options": ["A) 1895", "B) 1901", "C) 1910", "D) 1920"], "answer": "B"},
 {"category": "Toán học", "question": "Nếu f(x) = 2x + 3, giá trị của f(5) là?", "options": ["A) 10", "B) 11", "C) 13", "D) 15"], "answer": "C"},
 {"category": "Toán học", "question": "Số ngẫu nhiên chọn từ 1 đến 10, xác suất chọn số chẵn là bao nhiêu?", "options": ["A) 1/2", "B) 1/3", "C) 2/5", "D) 3/5"], "answer": "A"},
 {"category": "Toán học", "question": "Diện tích hình tam giác có đáy 8cm, cao 5cm là?", "options": ["A) 20 cm²", "B) 40 cm²", "C) 30 cm²", "D) 25 cm²"], "answer": "A"},
@@ -334,7 +334,7 @@ quiz_questions = [
 {"category": "Lịch sử thế giới", "question": "Cuộc Cách mạng Nga diễn ra năm nào?", "options": ["A) 1914", "B) 1917", "C) 1920", "D) 1923"], "answer": "B"},
 {"category": "Lịch sử thế giới", "question": "Hiệp ước Versailles kết thúc chiến tranh nào?", "options": ["A) Chiến tranh thế giới thứ nhất", "B) Chiến tranh thế giới thứ hai", "C) Chiến tranh Napoleon", "D) Chiến tranh Pháp-Đức"], "answer": "A"},
 {"category": "Lịch sử thế giới", "question": "Ai là thủ tướng Anh trong phần lớn Chiến tranh thế giới thứ hai?", "options": ["A) Churchill", "B) Chamberlain", "C) Blair", "D) Eden"], "answer": "A"},
-{"category": "Lịch sử thế giới", "question": "Mặt trận Tây Âu trong Chiến tranh thế giới thứ nhất chủ yếu ở nước nào?", "options": ["A) Đức", "B) Pháp", "C) Bỉ", "D) Anh"], "answer": "B"}
+{"category": "Lịch sử thế giới", "question": "Mặt trận Tây Âu trong Chiến tranh thế giới thứ nhất chủ yếu ở nước nào?", "options": ["A) Đức", "B) Pháp", "C) Bỉ", "D) Anh"], "answer": "B"},
 {"category": "Toán học", "question": "Giá trị của biểu thức 5² - 3² là?", "options": ["A) 16", "B) 25", "C) 12", "D) 34"], "answer": "A"},
 {"category": "Toán học", "question": "Tổng các số lẻ từ 1 đến 9 là?", "options": ["A) 20", "B) 25", "C) 30", "D) 35"], "answer": "B"},
 {"category": "Toán học", "question": "Số nào là số nguyên tố?", "options": ["A) 21", "B) 29", "C) 33", "D) 35"], "answer": "B"},
@@ -376,7 +376,7 @@ quiz_questions = [
 {"category": "Logic IQ", "question": "Có 6 cái bánh chia cho 6 người, sao mỗi người có 1 cái mà vẫn còn 1 cái trong hộp?", "options": ["A) Một người lấy cả hộp", "B) Một cái vẫn trong hộp", "C) Một người không ăn", "D) Người cuối cùng lấy cả hộp"], "answer": "D"},
 {"category": "Logic IQ", "question": "Số tiếp theo trong dãy: 1, 1, 2, 3, 5, 8, ...?", "options": ["A) 10", "B) 12", "C) 13", "D) 15"], "answer": "C"},
 {"category": "Logic IQ", "question": "Một đồng hồ chạy nhanh 5 phút mỗi giờ. Nếu bây giờ đúng 12h, 3 giờ sau đồng hồ chỉ mấy giờ?", "options": ["A) 2:00", "B) 3:15", "C) 3:10", "D) 3:05"], "answer": "B"},
-{"category": "Logic IQ", "question": "Nếu tất cả A là B, tất cả B là C, thì tất cả A là gì?", "options": ["A) B", "B) C", "C) Không xác định", "D) A"], "answer": "B"}
+{"category": "Logic IQ", "question": "Nếu tất cả A là B, tất cả B là C, thì tất cả A là gì?", "options": ["A) B", "B) C", "C) Không xác định", "D) A"], "answer": "B"},
 {"category": "Toán học", "question": "Giá trị của 7² - 4² là?", "options": ["A) 33", "B) 45", "C) 49", "D) 37"], "answer": "B"},
 {"category": "Toán học", "question": "Tổng các số từ 1 đến 20 là?", "options": ["A) 190", "B) 200", "C) 210", "D) 220"], "answer": "C"},
 {"category": "Toán học", "question": "Số nguyên tố nhỏ hơn 20 là số nào?", "options": ["A) 2,3,5,7,11,13,17,19", "B) 1,2,3,5,7,11,13,17", "C) 2,3,5,7,9,11,13,17", "D) 1,3,5,7,11,13,17"], "answer": "A"},
