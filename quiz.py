@@ -289,8 +289,8 @@ async def quiz(ctx):
     view = QuizView(quiz, ctx, msg)
     await msg.edit(view=view)
     # Chờ câu hỏi kết thúc
-    while is_quiz_running:
-        await asyncio.sleep(1)
+    await view.wait()
+
     
     global no_answer_streak
     if not view.answered_users:
@@ -350,6 +350,7 @@ import os
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
 #add keep_alive for Render
+
 
 
 
