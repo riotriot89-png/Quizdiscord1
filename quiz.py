@@ -55,6 +55,7 @@ player_scores = load_scores()
 # ======================
 asked_questions = set()
 is_quiz_running = False
+quiz_lock = asyncio.Lock()  # ✅ Thêm khai báo lock
 no_answer_streak = 0
 
 
@@ -259,15 +260,14 @@ async def quiz(ctx):
 
     # ✅ Nếu quiz đang chạy, ngăn không cho tạo thêm
     async with quiz_lock:
-      if is_quiz_running:
-        await ctx.send("⚠️ Đang có câu hỏi diễn ra rồi! Vui lòng đợi câu hỏi này kết thúc.")
-        return
+        if is_quiz_running:
+            await ctx.send("⚠️ Đang có câu hỏi diễn ra rồi! Vui lòng đợi câu hỏi này kết thúc.")
+            return
 
-    is_quiz_running = True
-    no_answer_streak = 0
+        is_quiz_running = True
+        no_answer_streak = 0
 
     while True:
-        # Lọc những câu chưa hỏi
         remaining_questions = [q for q in quiz_questions if q["question"] not in asked_questions]
 
         if not remaining_questions:
@@ -275,11 +275,9 @@ async def quiz(ctx):
             is_quiz_running = False
             break
 
-        # Lấy ngẫu nhiên 1 câu chưa hỏi
         question_data = random.choice(remaining_questions)
         asked_questions.add(question_data["question"])
 
-        # Tạo embed câu hỏi
         embed = discord.Embed(
             title="🧠 Câu hỏi kiến thức",
             description=question_data["question"],
@@ -292,24 +290,19 @@ async def quiz(ctx):
         view = QuizView(question_data, ctx, msg)
         await msg.edit(view=view)
 
-        # ⏳ Chờ người chơi trả lời hoặc hết thời gian
         await view.wait()
 
-        # Kiểm tra có ai trả lời không
         if not view.answered_users:
             no_answer_streak += 1
         else:
             no_answer_streak = 0
 
-        # Dừng nếu 4 câu liên tiếp không ai trả lời
         if no_answer_streak >= 4:
             await ctx.send("🚫 Không ai trả lời trong 4 câu liên tiếp — kết thúc trò chơi!")
             break
 
-        # ⏱ Chờ 1 giây rồi mới ra câu tiếp theo
         await asyncio.sleep(1)
 
-    # ✅ Kết thúc quiz thật sự
     is_quiz_running = False
 
 # ======================
@@ -323,7 +316,7 @@ async def score(ctx):
 
     sorted_scores = sorted(player_scores.items(), key=lambda x: x[1], reverse=True)
     total_players = len(sorted_scores)
-    mid = max(1, total_players // 2)  # ít nhất 1 người ở nhóm thông minh
+    mid = max(1, total_players // 2)
 
     smart_players = sorted_scores[:mid]
     dumb_players = sorted_scores[mid:]
@@ -354,6 +347,7 @@ import os
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
 #add keep_alive for Render
+
 
 
 
