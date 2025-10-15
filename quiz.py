@@ -101,7 +101,7 @@ import time
 
 class QuizView(discord.ui.View):
     def __init__(self, quiz, ctx, question_message):
-        super().__init__(timeout=10)
+        super().__init__(timeout=20)
         self.quiz = quiz
         self.correct_answer = quiz["answer"]
         self.ctx = ctx
@@ -219,7 +219,7 @@ class QuizView(discord.ui.View):
         )
         embed.add_field(name="----- TRẢ LỜI ĐÚNG ✅ -----", value="\n".join(correct_list), inline=False)
         embed.add_field(name="----- TRẢ LỜI SAI ❌ -----", value="\n".join(wrong_list), inline=False)
-        embed.add_field(name="🕓 Thời gian tối đa", value="10 giây", inline=True)
+        embed.add_field(name="🕓 Thời gian tối đa", value="20 giây", inline=True)
         # Hiển thị đáp án đầy đủ (ví dụ: "B) Sông Hồng")
         options = self.quiz["options"]
         full_answer = next(
@@ -282,7 +282,7 @@ async def quiz(ctx):
         color=random.randint(0, 0xFFFFFF)
     )
     embed.add_field(name="Các lựa chọn", value="\n".join(quiz["options"]), inline=False)
-    embed.set_footer(text="⏰ Bạn có 10 giây để trả lời!")
+    embed.set_footer(text="⏰ Bạn có 20 giây để trả lời!")
 
     msg = await ctx.send(embed=embed)
     view = QuizView(quiz, ctx, msg)
@@ -330,6 +330,7 @@ import os
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
 #add keep_alive for Render
+
 
 
 
