@@ -258,6 +258,7 @@ async def quiz(ctx):
     global asked_questions, is_quiz_running, no_answer_streak
 
     # ✅ Nếu quiz đang chạy, ngăn không cho tạo thêm
+    async with quiz_lock:
     if is_quiz_running:
         await ctx.send("⚠️ Đang có câu hỏi diễn ra rồi! Vui lòng đợi câu hỏi này kết thúc.")
         return
@@ -353,6 +354,7 @@ import os
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
 #add keep_alive for Render
+
 
 
 
