@@ -244,7 +244,7 @@ quiz_questions = [
 {"category": "Logic", "question": "Nếu hôm nay là thứ Ba, thì sau 3 ngày nữa là thứ mấy?", "options": ["A) Thứ Năm", "B) Thứ Sáu", "C) Thứ Bảy", "D) Chủ Nhật"], "answer": "C"},
 {"category": "Logic", "question": "5 người xếp hàng. Nếu A đứng trước B và B đứng trước C, thì ai đứng sau C?", "options": ["A) D", "B) A", "C) B", "D) Không biết"], "answer": "A"},
 {"category": "Logic", "question": "Nếu 2 con vịt đi trước 1 con vịt và 2 con vịt đi sau 1 con vịt, tổng cộng có bao nhiêu con vịt?", "options": ["A) 3", "B) 4", "C) 5", "D) 6"], "answer": "A"},
-{"category": "Logic", "question": "Nếu 1 giờ có 60 phút, 3/4 giờ là bao nhiêu phút?", "options": ["A) 30", "B) 45", "C) 50", "D) 40"], "answer": "B"}
+{"category": "Logic", "question": "Nếu 1 giờ có 60 phút, 3/4 giờ là bao nhiêu phút?", "options": ["A) 30", "B) 45", "C) 50", "D) 40"], "answer": "B"},
 {"category": "Lịch sử", "question": "Chiến tranh lạnh diễn ra giữa hai khối nào?", "options": ["A) NATO và Liên Xô", "B) Mỹ và Trung Quốc", "C) Anh và Đức", "D) Nhật và Hàn"], "answer": "A"},
 {"category": "Lịch sử", "question": "Ai là người viết bản 'Tuyên ngôn độc lập' của Việt Nam năm 1945?", "options": ["A) Phạm Văn Đồng", "B) Võ Nguyên Giáp", "C) Hồ Chí Minh", "D) Trường Chinh"], "answer": "C"},
 {"category": "Lịch sử", "question": "Cách mạng công nghiệp lần thứ nhất bắt đầu ở đâu?", "options": ["A) Mỹ", "B) Pháp", "C) Anh", "D) Đức"], "answer": "C"},
