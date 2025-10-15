@@ -276,9 +276,11 @@ async def quiz(ctx):
             is_quiz_running = False
             break
 
+        # Lấy ngẫu nhiên 1 câu chưa hỏi
         question_data = random.choice(remaining_questions)
         asked_questions.add(question_data["question"])
 
+        # Tạo embed câu hỏi
         embed = discord.Embed(
             title="🧠 Câu hỏi kiến thức",
             description=question_data["question"],
@@ -290,6 +292,8 @@ async def quiz(ctx):
         msg = await ctx.send(embed=embed)
         view = QuizView(question_data, ctx, msg)
         await msg.edit(view=view)
+
+        # ⏳ Chờ người chơi trả lời hoặc hết thời gian
         await view.wait()
 
         # Kiểm tra có ai trả lời không
@@ -301,11 +305,13 @@ async def quiz(ctx):
         # Dừng nếu 4 câu liên tiếp không ai trả lời
         if no_answer_streak >= 4:
             await ctx.send("🚫 Không ai trả lời trong 4 câu liên tiếp — kết thúc trò chơi!")
-            is_quiz_running = False
             break
 
-        # 👉 Ngay khi xong câu, lập tức ra câu mới (không cần sleep)
+        # ⏱ Chờ 1 giây rồi mới ra câu tiếp theo
+        await asyncio.sleep(1)
 
+    # ✅ Kết thúc quiz thật sự
+    is_quiz_running = False
 
 # ======================
 # Lệnh xem bảng điểm
@@ -349,6 +355,7 @@ import os
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
 #add keep_alive for Render
+
 
 
 
