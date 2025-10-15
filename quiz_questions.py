@@ -214,7 +214,7 @@ quiz_questions = [
 {"category": "Kinh tế", "question": "GDP là viết tắt của cụm từ nào?", "options": ["A) Global Development Plan", "B) Gross Domestic Product", "C) General Data Policy", "D) Government Debt Payment"], "answer": "B"},
 {"category": "Kinh tế", "question": "Thị trường chứng khoán đầu tiên trên thế giới được thành lập ở đâu?", "options": ["A) Mỹ", "B) Hà Lan", "C) Anh", "D) Pháp"], "answer": "B"},
 {"category": "Địa chính trị", "question": "Tổ chức NATO được thành lập năm nào?", "options": ["A) 1945", "B) 1947", "C) 1949", "D) 1950"], "answer": "C"},
-{"category": "Địa chính trị", "question": "Liên Hợp Quốc có trụ sở chính đặt ở đâu?", "options": ["A) Paris", "B) London", "C) Geneva", "D) New York"], "answer": "D"}
+{"category": "Địa chính trị", "question": "Liên Hợp Quốc có trụ sở chính đặt ở đâu?", "options": ["A) Paris", "B) London", "C) Geneva", "D) New York"], "answer": "D"},
 {"category": "Công nghệ", "question": "Ai được coi là cha đẻ của máy tính hiện đại?", "options": ["A) Alan Turing", "B) Bill Gates", "C) Steve Jobs", "D) Charles Babbage"], "answer": "D"},
 {"category": "Công nghệ", "question": "Ngôn ngữ lập trình nào được sử dụng để phát triển trình duyệt Chrome?", "options": ["A) C++", "B) Python", "C) Java", "D) Rust"], "answer": "A"},
 {"category": "Công nghệ", "question": "AI là viết tắt của từ gì?", "options": ["A) Advanced Internet", "B) Artificial Intelligence", "C) Automated Input", "D) Adaptive Interface"], "answer": "B"},
