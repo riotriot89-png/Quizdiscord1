@@ -252,61 +252,59 @@ class QuizView(discord.ui.View):
             embed.description = "⏰ Hết thời gian hoặc không ai trả lời đúng!"
             await self.ctx.send(embed=embed)
 
-
 # ======================
 # Lệnh quiz
 # ======================
 @bot.command()
 async def quiz(ctx):
-    global asked_questions, is_quiz_running
+    global asked_questions, is_quiz_running, no_answer_streak
 
     # ✅ Nếu quiz đang chạy, ngăn không cho tạo thêm
     if is_quiz_running:
         await ctx.send("⚠️ Đang có câu hỏi diễn ra rồi! Vui lòng đợi câu hỏi này kết thúc.")
         return
 
-    is_quiz_running = True  # 🔒 Đánh dấu đang chạy
+    is_quiz_running = True
+    no_answer_streak = 0
 
-    # Lọc những câu chưa hỏi
-    remaining_questions = [q for q in quiz_questions if q["question"] not in asked_questions]
+    while True:
+        # Lọc những câu chưa hỏi
+        remaining_questions = [q for q in quiz_questions if q["question"] not in asked_questions]
 
-    if not remaining_questions:
-        await ctx.send("🎯 Hết câu hỏi rồi! Hãy reset bot hoặc thêm câu hỏi mới nhé.")
-        return
+        if not remaining_questions:
+            await ctx.send("🎯 Hết câu hỏi rồi! Hãy reset bot hoặc thêm câu hỏi mới nhé.")
+            is_quiz_running = False
+            break
 
-    question_data = random.choice(remaining_questions)
-    asked_questions.add(question_data["question"]) # Đánh dấu đã hỏi
+        question_data = random.choice(remaining_questions)
+        asked_questions.add(question_data["question"])
 
-    embed = discord.Embed(
-        title="🧠 Câu hỏi kiến thức",
-        description=question_data["question"],
-        color=random.randint(0, 0xFFFFFF)
-    )
-    embed.add_field(name="Các lựa chọn", value="\n".join(question_data["options"]), inline=False)
-    embed.set_footer(text="⏰ Bạn có 20 giây để trả lời!")
-    
-    msg = await ctx.send(embed=embed)
-    view = QuizView(question_data, ctx, msg)
-    await msg.edit(view=view)
-    # Chờ câu hỏi kết thúc
-    await view.wait()
+        embed = discord.Embed(
+            title="🧠 Câu hỏi kiến thức",
+            description=question_data["question"],
+            color=random.randint(0, 0xFFFFFF)
+        )
+        embed.add_field(name="Các lựa chọn", value="\n".join(question_data["options"]), inline=False)
+        embed.set_footer(text="⏰ Bạn có 20 giây để trả lời!")
 
+        msg = await ctx.send(embed=embed)
+        view = QuizView(question_data, ctx, msg)
+        await msg.edit(view=view)
+        await view.wait()
 
-    
-    global no_answer_streak
-    if not view.answered_users:
-        no_answer_streak += 1
-    else:
-        no_answer_streak = 0
-    
-    if no_answer_streak >= 4:
-        await ctx.send("🚫 Không ai trả lời trong 4 câu liên tiếp — kết thúc trò chơi!")
-        is_quiz_running = False
-        no_answer_streak = 0
-        return
+        # Kiểm tra có ai trả lời không
+        if not view.answered_users:
+            no_answer_streak += 1
+        else:
+            no_answer_streak = 0
 
-    await quiz(ctx)
+        # Dừng nếu 4 câu liên tiếp không ai trả lời
+        if no_answer_streak >= 4:
+            await ctx.send("🚫 Không ai trả lời trong 4 câu liên tiếp — kết thúc trò chơi!")
+            is_quiz_running = False
+            break
 
+        # 👉 Ngay khi xong câu, lập tức ra câu mới (không cần sleep)
 
 
 # ======================
@@ -351,6 +349,7 @@ import os
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
 #add keep_alive for Render
+
 
 
 
