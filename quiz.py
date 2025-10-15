@@ -117,8 +117,7 @@ class QuizView(discord.ui.View):
             child.disabled = True
         await self.question_message.edit(view=self)
         await self.show_results(timeout=True)
-        global is_quiz_running
-        is_quiz_running = False
+        
 
 
     @discord.ui.button(label="A", style=discord.ButtonStyle.primary)
@@ -186,8 +185,7 @@ class QuizView(discord.ui.View):
             await self.question_message.edit(view=self)
 
             await self.show_results(timeout=False, file=file, winner_score=score)
-            global is_quiz_running
-            is_quiz_running = False
+            
 
             self.stop()
         else:
@@ -355,6 +353,7 @@ import os
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
 #add keep_alive for Render
+
 
 
 
