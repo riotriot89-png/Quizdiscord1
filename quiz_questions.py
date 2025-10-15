@@ -274,7 +274,7 @@ quiz_questions = [
 {"category": "Logic", "question": "Một con mèo và nửa con mèo bắt 1 con chuột rưỡi trong 1 phút rưỡi. Hỏi 9 con mèo bắt được bao nhiêu chuột trong 9 phút?", "options": ["A) 27", "B) 54", "C) 81", "D) 108"], "answer": "B"},
 {"category": "Logic", "question": "Có 5 cây nến đang cháy, gió thổi tắt 2 cây. Hỏi còn lại bao nhiêu cây nến?", "options": ["A) 3", "B) 2", "C) 5", "D) 7"], "answer": "C"},
 {"category": "Logic", "question": "Một người đi bộ 3km/h, người kia đi xe đạp 9km/h. Nếu họ xuất phát cùng lúc từ hai điểm cách nhau 12km, họ gặp nhau sau bao lâu?", "options": ["A) 1h", "B) 1.5h", "C) 2h", "D) 3h"], "answer": "B"},
-{"category": "Logic", "question": "Nếu 2 + 2 = 4, 3 + 3 = 6, thì 4 + 4 bằng bao nhiêu?", "options": ["A) 6", "B) 7", "C) 8", "D) 9"], "answer": "C"}
+{"category": "Logic", "question": "Nếu 2 + 2 = 4, 3 + 3 = 6, thì 4 + 4 bằng bao nhiêu?", "options": ["A) 6", "B) 7", "C) 8", "D) 9"], "answer": "C"},
 {"category": "Toán học", "question": "Giải phương trình: 3x - 7 = 11. Giá trị x là?", "options": ["A) 4", "B) 5", "C) 6", "D) 7"], "answer": "C"},
 {"category": "Toán học", "question": "Tích của 7 và 8 bằng bao nhiêu?", "options": ["A) 54", "B) 56", "C) 58", "D) 64"], "answer": "B"},
 {"category": "Toán học", "question": "Số nguyên tố nhỏ hơn 10 là số nào?", "options": ["A) 1, 2, 3, 5, 7", "B) 2, 3, 5, 7", "C) 1, 3, 5, 7, 9", "D) 2, 3, 5, 7, 9"], "answer": "B"},
