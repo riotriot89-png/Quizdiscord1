@@ -308,7 +308,7 @@ async def quiz(ctx):
             description=question_data["question"],
             color=random.randint(0, 0xFFFFFF)
         )
-                        embed.add_field(name="Các lựa chọn", value="\n".join(question_data["options"]), inline=False)
+        embed.add_field(name="Các lựa chọn", value="\n".join(question_data["options"]), inline=False)
         embed.set_footer(text="⏰ Bạn có 20 giây để trả lời!")
 
         msg = await ctx.send(embed=embed)
@@ -563,6 +563,7 @@ import os
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
 #add keep_alive for Render
+
 
 
 
