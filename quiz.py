@@ -331,6 +331,87 @@ async def quiz(ctx):
     is_quiz_running = False
 
 # ======================
+# Hàm ghép ảnh xếp hạng từ trên xuống (bzscore)
+# ======================
+def create_score_ranking_image(rank_data):
+    """Tạo ảnh ghép xếp hạng từ trên xuống"""
+    item_width = 200
+    item_height = 120
+    padding = 10
+    
+    # Tính kích thước canvas
+    canvas_width = item_width + 2 * padding
+    canvas_height = len(rank_data) * item_height + (len(rank_data) - 1) * padding + 2 * padding
+    
+    canvas = Image.new("RGBA", (canvas_width, canvas_height), (0, 0, 0, 0))
+    
+    for idx, (rank, avatar_img, user_name, points) in enumerate(rank_data):
+        y_pos = idx * (item_height + padding) + padding
+        
+        # Vẽ nền cho mỗi item
+        item_img = Image.new("RGBA", (item_width, item_height), (30, 30, 30, 200))
+        draw = ImageDraw.Draw(item_img)
+        
+        # Vẽ avatar nhỏ
+        avatar_small = avatar_img.resize((80, 80))
+        item_img.paste(avatar_small, (10, 20), avatar_small)
+        
+        # Vẽ text (rank, tên, điểm)
+        try:
+            from PIL import ImageFont
+            font = ImageFont.load_default()
+        except:
+            font = ImageFont.load_default()
+        
+        medal = "🥇" if rank == 1 else "🥈" if rank == 2 else "🥉" if rank == 3 else f"#{rank}"
+        draw.text((100, 20), f"{medal} {user_name}", fill=(255, 255, 255), font=font)
+        draw.text((100, 50), f"{points} pts", fill=(255, 215, 0), font=font)
+        
+        canvas.paste(item_img, (padding, y_pos), item_img)
+    
+    output = io.BytesIO()
+    canvas.save(output, format="PNG")
+    output.seek(0)
+    return output
+
+# ======================
+# Hàm ghép ảnh shop khung từ trái sang phải
+# ======================
+def create_shop_frames_image():
+    """Tạo ảnh ghép khung từ trái sang phải"""
+    frame_size = 150
+    padding = 15
+    
+    canvas_width = len(FRAMES) * frame_size + (len(FRAMES) - 1) * padding + 2 * padding
+    canvas_height = frame_size + 2 * padding + 50  # Thêm chỗ cho text
+    
+    canvas = Image.new("RGBA", (canvas_width, canvas_height), (0, 0, 0, 0))
+    
+    for idx, (frame_id, frame_data) in enumerate(FRAMES.items()):
+        x_pos = idx * (frame_size + padding) + padding
+        
+        # Load khung
+        if os.path.exists(frame_data["file"]):
+            frame_img = Image.open(frame_data["file"]).convert("RGBA").resize((frame_size, frame_size))
+            canvas.paste(frame_img, (x_pos, padding), frame_img)
+            
+            # Vẽ tên khung
+            try:
+                from PIL import ImageFont
+                font = ImageFont.load_default()
+            except:
+                font = ImageFont.load_default()
+            
+            draw = ImageDraw.Draw(canvas)
+            status = "FREE" if frame_data["price"] == 0 else f"{frame_data['price']}"
+            draw.text((x_pos, frame_size + padding + 10), status, fill=(255, 255, 255), font=font)
+    
+    output = io.BytesIO()
+    canvas.save(output, format="PNG")
+    output.seek(0)
+    return output
+
+# ======================
 # Lệnh xem bảng điểm (CẬP NHẬT)
 # ======================
 @bot.command()
@@ -341,92 +422,58 @@ async def score(ctx):
 
     sorted_scores = sorted(player_scores.items(), key=lambda x: x[1], reverse=True)
     
-    # Gửi embed danh sách điểm chính
-    smart_list = ""
+    # Chuẩn bị dữ liệu
+    rank_data = []
     for i, (user_id, points) in enumerate(sorted_scores, start=1):
         user = await bot.fetch_user(int(user_id))
-        medal = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else f"{i}."
-        smart_list += f"{medal} **{user.name}** — {points} điểm\n"
-
-    embed = discord.Embed(
-        title="🏆 BẢNG XẾP HẠNG ĐIỂM",
-        description=smart_list,
-        color=discord.Color.gold()
-    )
-    embed.set_footer(text="Crate: 🌸 Boizzzz 🗡")
-
-    await ctx.send(embed=embed)
-    
-    # Gửi avatar + khung của từng người chơi
-    for i, (user_id, points) in enumerate(sorted_scores, start=1):
-        user = await bot.fetch_user(int(user_id))
-        medal = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else f"#{i}"
         
         # Tải avatar
         async with aiohttp.ClientSession() as session:
             async with session.get(user.display_avatar.url) as resp:
                 avatar_bytes = await resp.read()
         
-        # Lấy khung đang trang bị
-        frame_path = get_user_frame(user_id)
-        
-        # Ghép avatar với khung
-        png_bytes = merge_avatar_with_frame_on_top(
-            avatar_bytes,
-            frame_path=frame_path,
-            avatar_size=(158,158),
-            final_size=(256,256),
-            y_offset=-10
-        )
-        file = discord.File(fp=png_bytes, filename=f"rank_{i}.png")
-        
-        score_embed = discord.Embed(
-            title=f"{medal} {user.name}",
-            description=f"**{points} điểm**",
-            color=discord.Color.gold()
-        )
-        score_embed.set_image(url=f"attachment://rank_{i}.png")
-        
-        await ctx.send(embed=score_embed, file=file)
+        avatar_img = Image.open(io.BytesIO(avatar_bytes)).convert("RGBA")
+        rank_data.append((i, avatar_img, user.name, points))
+    
+    # Tạo ảnh ghép
+    ranking_img = create_score_ranking_image(rank_data)
+    file = discord.File(fp=ranking_img, filename="ranking.png")
+    
+    embed = discord.Embed(
+        title="🏆 BẢNG XẾP HẠNG ĐIỂM",
+        color=discord.Color.gold()
+    )
+    embed.set_image(url="attachment://ranking.png")
+    embed.set_footer(text="Crate: 🌸 Boizzzz 🗡")
+    
+    await ctx.send(embed=embed, file=file)
 
 # ======================
 # Lệnh shop (CẬP NHẬT)
 # ======================
 @bot.command()
 async def shop(ctx):
-    embed = discord.Embed(
-        title="🛒 SHOP KHUNG AVATAR",
-        description="Dùng điểm của bạn để mua khung đẹp hơn!",
-        color=discord.Color.blue()
-    )
-    
-    for frame_id, frame_data in FRAMES.items():
-        status = "🎁 MIỄN PHÍ" if frame_data["price"] == 0 else f"💰 {frame_data['price']} điểm"
-        embed.add_field(
-            name=f"{frame_data['emoji']} {frame_data['name']} (ID: {frame_id})",
-            value=f"Giá: {status}",
-            inline=False
-        )
+    # Tạo ảnh ghép khung
+    shop_img = create_shop_frames_image()
+    file = discord.File(fp=shop_img, filename="shop.png")
     
     user_points = player_scores.get(str(ctx.author.id), 0)
-    embed.set_footer(text=f"💵 Điểm của bạn: {user_points} | Dùng bzuy <ID> để mua")
     
-    # Gửi embed chính trước
-    await ctx.send(embed=embed)
-    
-    # Gửi hình ảnh các khung
+    # Tạo danh sách giá
+    prices_text = ""
     for frame_id, frame_data in FRAMES.items():
-        frame_path = frame_data["file"]
-        
-        # Kiểm tra file có tồn tại không
-        if os.path.exists(frame_path):
-            frame_embed = discord.Embed(
-                title=f"{frame_data['emoji']} {frame_data['name']}",
-                color=discord.Color.blue()
-            )
-            frame_embed.set_image(url=f"attachment://{frame_path}")
-            
-            await ctx.send(embed=frame_embed, file=discord.File(frame_path))
+        status = "🎁 MIỄN PHÍ" if frame_data["price"] == 0 else f"💰 {frame_data['price']} điểm"
+        prices_text += f"**ID {frame_id}** - {frame_data['emoji']} {frame_data['name']}: {status}\n"
+    
+    embed = discord.Embed(
+        title="🛒 SHOP KHUNG AVATAR",
+        description=prices_text,
+        color=discord.Color.blue()
+    )
+    embed.set_image(url="attachment://shop.png")
+    embed.set_footer(text=f"💵 Điểm của bạn: {user_points} | Dùng bzbuy <ID> để mua")
+    
+    await ctx.send(embed=embed, file=file)
 
 # ======================
 # Lệnh mua khung
@@ -633,10 +680,12 @@ async def trudiem(ctx, member: discord.Member, amount: int):
 async def perm_error(ctx, error):
     if isinstance(error, MissingPermissions):
         await ctx.send("❌ Bạn không có quyền để dùng lệnh này.")
+        
 import os
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
 #add keep_alive for Render
+
 
 
 
