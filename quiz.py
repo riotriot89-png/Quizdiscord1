@@ -559,10 +559,54 @@ async def help(ctx):
     
     await ctx.send(embed=embed)
 
+from discord.ext.commands import has_permissions, MissingPermissions
+
+# Lệnh cộng điểm
+@bot.command()
+@has_permissions(administrator=True)
+async def congdiem(ctx, member: discord.Member, amount: int):
+    """Cộng điểm cho người chơi (chỉ Admin dùng được)"""
+    user_id = str(member.id)
+    
+    if amount <= 0:
+        await ctx.send("⚠️ Số điểm phải lớn hơn 0.")
+        return
+
+    player_scores[user_id] = player_scores.get(user_id, 0) + amount
+    save_scores()
+
+    await ctx.send(f"✅ Đã cộng **{amount} điểm** cho {member.mention}. Tổng điểm: **{player_scores[user_id]}**")
+
+# Lệnh trừ điểm
+@bot.command()
+@has_permissions(administrator=True)
+async def trudiem(ctx, member: discord.Member, amount: int):
+    """Trừ điểm người chơi (chỉ Admin dùng được)"""
+    user_id = str(member.id)
+    
+    if amount <= 0:
+        await ctx.send("⚠️ Số điểm phải lớn hơn 0.")
+        return
+
+    current = player_scores.get(user_id, 0)
+    new_score = max(0, current - amount)
+    player_scores[user_id] = new_score
+    save_scores()
+
+    await ctx.send(f"🧨 Đã trừ **{amount} điểm** của {member.mention}. Tổng điểm còn lại: **{new_score}**")
+
+# Bắt lỗi nếu không có quyền
+@congdiem.error
+@trudiem.error
+async def perm_error(ctx, error):
+    if isinstance(error, MissingPermissions):
+        await ctx.send("❌ Bạn không có quyền để dùng lệnh này.")
+
 import os
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
 #add keep_alive for Render
+
 
 
 
