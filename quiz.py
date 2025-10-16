@@ -26,6 +26,7 @@ def keep_alive():
 
 
 SCORE_FILE = "scores.json"
+INVENTORY_FILE = "inventory.json"
 
 def load_scores():
     if os.path.exists(SCORE_FILE):
@@ -36,6 +37,16 @@ def load_scores():
 def save_scores():
     with open(SCORE_FILE, "w", encoding="utf-8") as f:
         json.dump(player_scores, f, ensure_ascii=False, indent=4)
+
+def load_inventory():
+    if os.path.exists(INVENTORY_FILE):
+        with open(INVENTORY_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+def save_inventory():
+    with open(INVENTORY_FILE, "w", encoding="utf-8") as f:
+        json.dump(player_inventory, f, ensure_ascii=False, indent=4)
 
 
 # ======================
@@ -49,13 +60,25 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 # Lưu điểm người chơi
 # ======================
 player_scores = load_scores()
+player_inventory = load_inventory()
+
+# ======================
+# Danh sách khung
+# ======================
+FRAMES = {
+    0: {"name": "Khung Mặc Định", "price": 0, "file": "frame.png", "emoji": "🖼️"},
+    1: {"name": "Khung Đồng", "price": 10, "file": "frame1.png", "emoji": "🥉"},
+    2: {"name": "Khung Bạc", "price": 20, "file": "frame2.png", "emoji": "🥈"},
+    3: {"name": "Khung Vàng", "price": 50, "file": "frame3.png", "emoji": "🥇"},
+    4: {"name": "Khung Kim Cương", "price": 100, "file": "frame4.png", "emoji": "💎"}
+}
 
 # ======================
 # Danh sách câu hỏi đã hỏi
 # ======================
 asked_questions = set()
 is_quiz_running = False
-quiz_lock = asyncio.Lock()  # ✅ Thêm khai báo lock
+quiz_lock = asyncio.Lock()
 no_answer_streak = 0
 
 
@@ -82,6 +105,11 @@ def merge_avatar_with_frame_on_top(
 ):
     avatar_img = Image.open(io.BytesIO(avatar_bytes))
     avatar_img = make_circle_avatar(avatar_img, size=avatar_size)
+    
+    # Kiểm tra file khung có tồn tại không, nếu không dùng frame.png
+    if not os.path.exists(frame_path):
+        frame_path = 'frame.png'
+    
     frame = Image.open(frame_path).convert("RGBA").resize(final_size)
 
     pos_x = (final_size[0] - avatar_size[0]) // 2
@@ -96,6 +124,15 @@ def merge_avatar_with_frame_on_top(
     output_bytes.seek(0)
     return output_bytes
 
+def get_user_frame(user_id):
+    """Lấy khung đang trang bị của người chơi"""
+    user_id = str(user_id)
+    if user_id not in player_inventory:
+        return "frame.png"
+    
+    equipped = player_inventory[user_id].get("equipped", 0)
+    return FRAMES[equipped]["file"]
+
 # ======================
 # Giao diện trả lời (button)
 # ======================
@@ -109,7 +146,7 @@ class QuizView(discord.ui.View):
         self.ctx = ctx
         self.winner = None
         self.question_message = question_message
-        self.answered_users = {}  # {user_id: {"user": user, "answer": "A", "time": 1.23}}
+        self.answered_users = {}
         self.start_time = time.time()
 
     async def on_timeout(self):
@@ -118,8 +155,6 @@ class QuizView(discord.ui.View):
             child.disabled = True
         await self.question_message.edit(view=self)
         await self.show_results(timeout=True)
-        
-
 
     @discord.ui.button(label="A", style=discord.ButtonStyle.primary)
     async def a(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -140,12 +175,10 @@ class QuizView(discord.ui.View):
     async def check_answer(self, interaction, answer):
         global player_scores
 
-        # Nếu đã trả lời -> không cho chọn lại
         if interaction.user.id in self.answered_users:
             await interaction.response.send_message("⚠️ Bạn đã trả lời rồi, không thể chọn lại!", ephemeral=True)
             return
 
-        # Ghi nhận thời gian bấm
         elapsed = round(time.time() - self.start_time, 2)
         self.answered_users[interaction.user.id] = {
             "user": interaction.user,
@@ -153,40 +186,39 @@ class QuizView(discord.ui.View):
             "time": elapsed
         }
 
-        # Nếu có người đã đúng rồi, ngăn không cho ai khác chọn đúng
         if self.winner:
             await interaction.response.send_message("❗ Đã có người trả lời đúng rồi!", ephemeral=True)
             return
 
-        # Kiểm tra đúng/sai
         if answer == self.correct_answer:
             self.winner = interaction.user
-            player_scores[self.winner.id] = player_scores.get(self.winner.id, 0) + 1
-            save_scores()  # 🧠 Lưu ngay khi có thay đổi
-            score = player_scores[self.winner.id]
+            player_scores[str(self.winner.id)] = player_scores.get(str(self.winner.id), 0) + 1
+            save_scores()
+            score = player_scores[str(self.winner.id)]
 
             # Tải avatar
             async with aiohttp.ClientSession() as session:
                 async with session.get(self.winner.display_avatar.url) as resp:
                     avatar_bytes = await resp.read()
 
-            # Ghép avatar với khung
+            # Lấy khung đang trang bị
+            frame_path = get_user_frame(self.winner.id)
+
+            # Ghép avatar với khung (nhỏ hơn để làm thumbnail)
             png_bytes = merge_avatar_with_frame_on_top(
                 avatar_bytes,
-                frame_path='frame.png',
-                avatar_size=(177,177),
-                final_size=(256,256),
-                y_offset=-7
+                frame_path=frame_path,
+                avatar_size=(110,110),
+                final_size=(150,150),
+                y_offset=-5
             )
             file = discord.File(fp=png_bytes, filename="winner.png")
 
-            # Khóa nút
             for child in self.children:
                 child.disabled = True
             await self.question_message.edit(view=self)
 
             await self.show_results(timeout=False, file=file, winner_score=score)
-            
 
             self.stop()
         else:
@@ -194,7 +226,6 @@ class QuizView(discord.ui.View):
 
     async def show_results(self, timeout=False, file=None, winner_score=None):
         """Hiển thị kết quả bằng embed"""
-
         correct_list = []
         wrong_list = []
 
@@ -220,25 +251,20 @@ class QuizView(discord.ui.View):
         embed.add_field(name="----- TRẢ LỜI ĐÚNG ✅ -----", value="\n".join(correct_list), inline=False)
         embed.add_field(name="----- TRẢ LỜI SAI ❌ -----", value="\n".join(wrong_list), inline=False)
         embed.add_field(name="🕓 Thời gian tối đa", value="20 giây", inline=True)
-        # Hiển thị đáp án đầy đủ (ví dụ: "B) Sông Hồng")
+        
         options = self.quiz["options"]
         full_answer = next(
             (opt for opt in options if opt.startswith(self.correct_answer + ")")),
             self.correct_answer
         )
 
-
         embed.add_field(
             name="----- 📖 ĐÁP ÁN CHÍNH XÁC -----",
             value=full_answer,
             inline=False
-)
+        )
 
-        
-        # 🪄 Thêm một field trống để tạo khoảng cách trước footer
         embed.add_field(name="\u200b", value="\n\u200b", inline=False)
-
-        # 👇 Thêm dòng footer nhỏ ở cuối embed
         embed.set_footer(text="Crate: 🌸 Boizzzz 🗡")
 
         if self.winner and not timeout:
@@ -258,7 +284,6 @@ class QuizView(discord.ui.View):
 async def quiz(ctx):
     global asked_questions, is_quiz_running, no_answer_streak
 
-    # ✅ Nếu quiz đang chạy, ngăn không cho tạo thêm
     async with quiz_lock:
         if is_quiz_running:
             await ctx.send("⚠️ Đang có câu hỏi diễn ra rồi! Vui lòng đợi câu hỏi này kết thúc.")
@@ -323,13 +348,13 @@ async def score(ctx):
 
     smart_list = ""
     for i, (user_id, points) in enumerate(smart_players, start=1):
-        user = await bot.fetch_user(user_id)
+        user = await bot.fetch_user(int(user_id))
         smart_list += f"{i}. 🧠 **{user.name}** — {points} điểm\n"
 
     dumb_list = ""
     if dumb_players:
         for i, (user_id, points) in enumerate(dumb_players, start=mid + 1):
-            user = await bot.fetch_user(user_id)
+            user = await bot.fetch_user(int(user_id))
             dumb_list += f"{i}. 😅 **{user.name}** — {points} điểm\n"
     else:
         dumb_list = "(Không có ai ở nhóm này 🎉)"
@@ -343,6 +368,142 @@ async def score(ctx):
     embed.set_footer(text="Crate : 🌸 Boizzzz 🗡")
 
     await ctx.send(embed=embed)
+
+# ======================
+# Lệnh shop
+# ======================
+@bot.command()
+async def shop(ctx):
+    embed = discord.Embed(
+        title="🛒 SHOP KHUNG AVATAR",
+        description="Dùng điểm của bạn để mua khung đẹp hơn!",
+        color=discord.Color.blue()
+    )
+    
+    for frame_id, frame_data in FRAMES.items():
+        status = "🎁 MIỄN PHÍ" if frame_data["price"] == 0 else f"💰 {frame_data['price']} điểm"
+        embed.add_field(
+            name=f"{frame_data['emoji']} {frame_data['name']} (ID: {frame_id})",
+            value=f"Giá: {status}",
+            inline=False
+        )
+    
+    user_points = player_scores.get(str(ctx.author.id), 0)
+    embed.set_footer(text=f"💵 Điểm của bạn: {user_points} | Dùng !buy <ID> để mua")
+    
+    await ctx.send(embed=embed)
+
+# ======================
+# Lệnh mua khung
+# ======================
+@bot.command()
+async def buy(ctx, frame_id: int):
+    user_id = str(ctx.author.id)
+    
+    # Kiểm tra khung có tồn tại không
+    if frame_id not in FRAMES:
+        await ctx.send("❌ ID khung không hợp lệ! Dùng `!shop` để xem danh sách.")
+        return
+    
+    frame = FRAMES[frame_id]
+    
+    # Khởi tạo inventory nếu chưa có
+    if user_id not in player_inventory:
+        player_inventory[user_id] = {"owned": [0], "equipped": 0}
+    
+    # Kiểm tra đã sở hữu chưa
+    if frame_id in player_inventory[user_id]["owned"]:
+        await ctx.send(f"⚠️ Bạn đã sở hữu **{frame['name']}** rồi!")
+        return
+    
+    # Kiểm tra đủ điểm không
+    user_points = player_scores.get(user_id, 0)
+    if user_points < frame["price"]:
+        await ctx.send(f"❌ Không đủ điểm! Bạn cần **{frame['price']}** điểm nhưng chỉ có **{user_points}** điểm.")
+        return
+    
+    # Trừ điểm và thêm khung
+    player_scores[user_id] = user_points - frame["price"]
+    player_inventory[user_id]["owned"].append(frame_id)
+    
+    save_scores()
+    save_inventory()
+    
+    embed = discord.Embed(
+        title="✅ MUA THÀNH CÔNG!",
+        description=f"Bạn đã mua **{frame['emoji']} {frame['name']}**!",
+        color=discord.Color.green()
+    )
+    embed.add_field(name="💰 Giá", value=f"{frame['price']} điểm", inline=True)
+    embed.add_field(name="💵 Điểm còn lại", value=f"{player_scores[user_id]} điểm", inline=True)
+    embed.set_footer(text="Dùng !equip <ID> để trang bị khung này")
+    
+    await ctx.send(embed=embed)
+
+# ======================
+# Lệnh trang bị khung
+# ======================
+@bot.command()
+async def equip(ctx, frame_id: int):
+    user_id = str(ctx.author.id)
+    
+    # Kiểm tra khung có tồn tại không
+    if frame_id not in FRAMES:
+        await ctx.send("❌ ID khung không hợp lệ!")
+        return
+    
+    # Kiểm tra đã sở hữu chưa
+    if user_id not in player_inventory or frame_id not in player_inventory[user_id]["owned"]:
+        await ctx.send(f"❌ Bạn chưa sở hữu khung này! Dùng `!buy {frame_id}` để mua.")
+        return
+    
+    # Trang bị khung
+    player_inventory[user_id]["equipped"] = frame_id
+    save_inventory()
+    
+    frame = FRAMES[frame_id]
+    embed = discord.Embed(
+        title="✅ TRANG BỊ THÀNH CÔNG!",
+        description=f"Bạn đã trang bị **{frame['emoji']} {frame['name']}**!",
+        color=discord.Color.green()
+    )
+    embed.set_footer(text="Khung này sẽ hiển thị khi bạn trả lời đúng câu hỏi!")
+    
+    await ctx.send(embed=embed)
+
+# ======================
+# Lệnh xem inventory
+# ======================
+@bot.command(aliases=["inv"])
+async def inventory(ctx):
+    user_id = str(ctx.author.id)
+    
+    if user_id not in player_inventory or not player_inventory[user_id]["owned"]:
+        await ctx.send("📦 Bạn chưa có khung nào! Dùng `!shop` để xem và mua khung.")
+        return
+    
+    owned = player_inventory[user_id]["owned"]
+    equipped = player_inventory[user_id]["equipped"]
+    
+    embed = discord.Embed(
+        title="🎒 TỦ ĐỒ CỦA BẠN",
+        description="Các khung bạn đang sở hữu:",
+        color=discord.Color.purple()
+    )
+    
+    for frame_id in owned:
+        frame = FRAMES[frame_id]
+        status = "✅ ĐANG TRANG BỊ" if frame_id == equipped else "⚪ Chưa trang bị"
+        embed.add_field(
+            name=f"{frame['emoji']} {frame['name']} (ID: {frame_id})",
+            value=status,
+            inline=False
+        )
+    
+    embed.set_footer(text="Dùng !equip <ID> để thay đổi khung")
+    
+    await ctx.send(embed=embed)
+
 import os
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
