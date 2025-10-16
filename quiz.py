@@ -331,7 +331,7 @@ async def quiz(ctx):
     is_quiz_running = False
 
 # ======================
-# Lệnh xem bảng điểm
+# Lệnh xem bảng điểm (CẬP NHẬT)
 # ======================
 @bot.command()
 async def score(ctx):
@@ -340,37 +340,57 @@ async def score(ctx):
         return
 
     sorted_scores = sorted(player_scores.items(), key=lambda x: x[1], reverse=True)
-    total_players = len(sorted_scores)
-    mid = max(1, total_players // 2)
-
-    smart_players = sorted_scores[:mid]
-    dumb_players = sorted_scores[mid:]
-
+    
+    # Gửi embed danh sách điểm chính
     smart_list = ""
-    for i, (user_id, points) in enumerate(smart_players, start=1):
+    for i, (user_id, points) in enumerate(sorted_scores, start=1):
         user = await bot.fetch_user(int(user_id))
-        smart_list += f"{i}. 🧠 **{user.name}** — {points} điểm\n"
-
-    dumb_list = ""
-    if dumb_players:
-        for i, (user_id, points) in enumerate(dumb_players, start=mid + 1):
-            user = await bot.fetch_user(int(user_id))
-            dumb_list += f"{i}. 😅 **{user.name}** — {points} điểm\n"
-    else:
-        dumb_list = "(Không có ai ở nhóm này 🎉)"
+        medal = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else f"{i}."
+        smart_list += f"{medal} **{user.name}** — {points} điểm\n"
 
     embed = discord.Embed(
-        title="🏆 Xếp độ THÔNG MINH nào ",
+        title="🏆 BẢNG XẾP HẠNG ĐIỂM",
+        description=smart_list,
         color=discord.Color.gold()
     )
-    embed.add_field(name="🧠 Những người Thông Minh", value=smart_list, inline=False)
-    embed.add_field(name="💩 Những người NGỜ U", value=dumb_list, inline=False)
-    embed.set_footer(text="Crate : 🌸 Boizzzz 🗡")
+    embed.set_footer(text="Crate: 🌸 Boizzzz 🗡")
 
     await ctx.send(embed=embed)
+    
+    # Gửi avatar + khung của từng người chơi
+    for i, (user_id, points) in enumerate(sorted_scores, start=1):
+        user = await bot.fetch_user(int(user_id))
+        medal = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else f"#{i}"
+        
+        # Tải avatar
+        async with aiohttp.ClientSession() as session:
+            async with session.get(user.display_avatar.url) as resp:
+                avatar_bytes = await resp.read()
+        
+        # Lấy khung đang trang bị
+        frame_path = get_user_frame(user_id)
+        
+        # Ghép avatar với khung
+        png_bytes = merge_avatar_with_frame_on_top(
+            avatar_bytes,
+            frame_path=frame_path,
+            avatar_size=(158,158),
+            final_size=(256,256),
+            y_offset=-10
+        )
+        file = discord.File(fp=png_bytes, filename=f"rank_{i}.png")
+        
+        score_embed = discord.Embed(
+            title=f"{medal} {user.name}",
+            description=f"**{points} điểm**",
+            color=discord.Color.gold()
+        )
+        score_embed.set_image(url=f"attachment://rank_{i}.png")
+        
+        await ctx.send(embed=score_embed, file=file)
 
 # ======================
-# Lệnh shop
+# Lệnh shop (CẬP NHẬT)
 # ======================
 @bot.command()
 async def shop(ctx):
@@ -389,9 +409,24 @@ async def shop(ctx):
         )
     
     user_points = player_scores.get(str(ctx.author.id), 0)
-    embed.set_footer(text=f"💵 Điểm của bạn: {user_points} | Dùng !buy <ID> để mua")
+    embed.set_footer(text=f"💵 Điểm của bạn: {user_points} | Dùng bzuy <ID> để mua")
     
+    # Gửi embed chính trước
     await ctx.send(embed=embed)
+    
+    # Gửi hình ảnh các khung
+    for frame_id, frame_data in FRAMES.items():
+        frame_path = frame_data["file"]
+        
+        # Kiểm tra file có tồn tại không
+        if os.path.exists(frame_path):
+            frame_embed = discord.Embed(
+                title=f"{frame_data['emoji']} {frame_data['name']}",
+                color=discord.Color.blue()
+            )
+            frame_embed.set_image(url=f"attachment://{frame_path}")
+            
+            await ctx.send(embed=frame_embed, file=discord.File(frame_path))
 
 # ======================
 # Lệnh mua khung
@@ -436,7 +471,7 @@ async def buy(ctx, frame_id: int):
     )
     embed.add_field(name="💰 Giá", value=f"{frame['price']} điểm", inline=True)
     embed.add_field(name="💵 Điểm còn lại", value=f"{player_scores[user_id]} điểm", inline=True)
-    embed.set_footer(text="Dùng !equip <ID> để trang bị khung này")
+    embed.set_footer(text="Dùng bzequip <ID> để trang bị khung này")
     
     await ctx.send(embed=embed)
 
@@ -500,12 +535,9 @@ async def inventory(ctx):
             inline=False
         )
     
-    embed.set_footer(text="Dùng !equip <ID> để thay đổi khung")
+    embed.set_footer(text="Dùng bzequip <ID> để thay đổi khung")
     
     await ctx.send(embed=embed)
-
-import os
-keep_alive()
 
 # ======================
 # Lệnh help tùy chỉnh
@@ -601,11 +633,11 @@ async def trudiem(ctx, member: discord.Member, amount: int):
 async def perm_error(ctx, error):
     if isinstance(error, MissingPermissions):
         await ctx.send("❌ Bạn không có quyền để dùng lệnh này.")
-
 import os
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
 #add keep_alive for Render
+
 
 
 
