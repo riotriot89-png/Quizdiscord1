@@ -335,9 +335,9 @@ async def quiz(ctx):
 # ======================
 def create_score_ranking_image(rank_data):
     """Tạo ảnh ghép xếp hạng từ trên xuống"""
-    item_width = 200
-    item_height = 120
-    padding = 10
+    item_width = 250
+    item_height = 130
+    padding = 15
     
     # Tính kích thước canvas
     canvas_width = item_width + 2 * padding
@@ -345,16 +345,29 @@ def create_score_ranking_image(rank_data):
     
     canvas = Image.new("RGBA", (canvas_width, canvas_height), (0, 0, 0, 0))
     
-    for idx, (rank, avatar_img, user_name, points) in enumerate(rank_data):
+    for idx, (rank, avatar_img, frame_img, user_name, points) in enumerate(rank_data):
         y_pos = idx * (item_height + padding) + padding
         
         # Vẽ nền cho mỗi item
         item_img = Image.new("RGBA", (item_width, item_height), (30, 30, 30, 200))
         draw = ImageDraw.Draw(item_img)
         
-        # Vẽ avatar nhỏ
-        avatar_small = avatar_img.resize((80, 80))
-        item_img.paste(avatar_small, (10, 20), avatar_small)
+        # Vẽ khung + avatar ghép (nhỏ)
+        try:
+            # Ghép avatar vào khung
+            avatar_small = avatar_img.resize((70, 70)).convert("RGBA")
+            frame_small = frame_img.resize((90, 90)).convert("RGBA")
+            
+            # Tạo canvas nhỏ cho khung+avatar
+            combined = Image.new("RGBA", (90, 90), (0, 0, 0, 0))
+            pos_x = (90 - 70) // 2
+            pos_y = (90 - 70) // 2
+            combined.paste(avatar_small, (pos_x, pos_y), avatar_small)
+            combined.paste(frame_small, (0, 0), frame_small)
+            
+            item_img.paste(combined, (10, 20), combined)
+        except:
+            pass
         
         # Vẽ text (rank, tên, điểm)
         try:
@@ -364,8 +377,8 @@ def create_score_ranking_image(rank_data):
             font = ImageFont.load_default()
         
         medal = "🥇" if rank == 1 else "🥈" if rank == 2 else "🥉" if rank == 3 else f"#{rank}"
-        draw.text((100, 20), f"{medal} {user_name}", fill=(255, 255, 255), font=font)
-        draw.text((100, 50), f"{points} pts", fill=(255, 215, 0), font=font)
+        draw.text((115, 20), f"{medal} {user_name}", fill=(255, 255, 255), font=font)
+        draw.text((115, 50), f"{points} pts", fill=(255, 215, 0), font=font)
         
         canvas.paste(item_img, (padding, y_pos), item_img)
     
@@ -433,7 +446,12 @@ async def score(ctx):
                 avatar_bytes = await resp.read()
         
         avatar_img = Image.open(io.BytesIO(avatar_bytes)).convert("RGBA")
-        rank_data.append((i, avatar_img, user.name, points))
+        
+        # Lấy khung đang trang bị
+        frame_path = get_user_frame(user_id)
+        frame_img = Image.open(frame_path).convert("RGBA")
+        
+        rank_data.append((i, avatar_img, frame_img, user.name, points))
     
     # Tạo ảnh ghép
     ranking_img = create_score_ranking_image(rank_data)
@@ -685,6 +703,7 @@ import os
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
 #add keep_alive for Render
+
 
 
 
