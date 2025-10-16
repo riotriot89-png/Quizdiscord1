@@ -54,7 +54,7 @@ def save_inventory():
 # ======================
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix="!", intents=intents)
+bot = commands.Bot(command_prefix="bz", intents=intents)
 
 # ======================
 # Lưu điểm người chơi
@@ -270,7 +270,7 @@ class QuizView(discord.ui.View):
         if self.winner and not timeout:
             embed.description = f"🎉 **{self.winner.mention}** đã trả lời đúng và nhanh nhất!"
             embed.color = discord.Color.green()
-            embed.set_image(url="attachment://winner.png")
+            embed.set_thumbnail(url="attachment://winner.png")  # Dùng thumbnail thay vì image
             embed.add_field(name="🏅 Điểm hiện tại", value=f"{winner_score} điểm", inline=False)
             await self.ctx.send(embed=embed, file=file)
         else:
@@ -308,7 +308,7 @@ async def quiz(ctx):
             description=question_data["question"],
             color=random.randint(0, 0xFFFFFF)
         )
-        embed.add_field(name="Các lựa chọn", value="\n".join(question_data["options"]), inline=False)
+                        embed.add_field(name="Các lựa chọn", value="\n".join(question_data["options"]), inline=False)
         embed.set_footer(text="⏰ Bạn có 20 giây để trả lời!")
 
         msg = await ctx.send(embed=embed)
@@ -402,7 +402,7 @@ async def buy(ctx, frame_id: int):
     
     # Kiểm tra khung có tồn tại không
     if frame_id not in FRAMES:
-        await ctx.send("❌ ID khung không hợp lệ! Dùng `!shop` để xem danh sách.")
+        await ctx.send("❌ ID khung không hợp lệ! Dùng `bzshop` để xem danh sách.")
         return
     
     frame = FRAMES[frame_id]
@@ -454,7 +454,7 @@ async def equip(ctx, frame_id: int):
     
     # Kiểm tra đã sở hữu chưa
     if user_id not in player_inventory or frame_id not in player_inventory[user_id]["owned"]:
-        await ctx.send(f"❌ Bạn chưa sở hữu khung này! Dùng `!buy {frame_id}` để mua.")
+        await ctx.send(f"❌ Bạn chưa sở hữu khung này! Dùng `bzbuy {frame_id}` để mua.")
         return
     
     # Trang bị khung
@@ -479,7 +479,7 @@ async def inventory(ctx):
     user_id = str(ctx.author.id)
     
     if user_id not in player_inventory or not player_inventory[user_id]["owned"]:
-        await ctx.send("📦 Bạn chưa có khung nào! Dùng `!shop` để xem và mua khung.")
+        await ctx.send("📦 Bạn chưa có khung nào! Dùng `bzshop` để xem và mua khung.")
         return
     
     owned = player_inventory[user_id]["owned"]
@@ -506,8 +506,64 @@ async def inventory(ctx):
 
 import os
 keep_alive()
+
+# ======================
+# Lệnh help tùy chỉnh
+# ======================
+bot.remove_command('help')  # Xóa lệnh help mặc định
+
+@bot.command()
+async def help(ctx):
+    """Hiển thị danh sách lệnh"""
+    embed = discord.Embed(
+        title="📚 HƯỚNG DẪN SỬ DỤNG BOT",
+        description="Danh sách các lệnh bạn có thể sử dụng:",
+        color=discord.Color.blue()
+    )
+    
+    # Game Commands
+    embed.add_field(
+        name="🎮 LỆNH CHƠI GAME",
+        value=(
+            "`bzquiz` - Bắt đầu trò chơi câu hỏi\n"
+            "`bzscore` - Xem bảng xếp hạng điểm\n"
+        ),
+        inline=False
+    )
+    
+    # Shop Commands
+    embed.add_field(
+        name="🛒 LỆNH SHOP KHUNG",
+        value=(
+            "`bzshop` - Xem danh sách khung có thể mua\n"
+            "`bzbuy <ID>` - Mua khung (VD: `bzbuy 1`)\n"
+            "`bzequip <ID>` - Trang bị khung đã mua\n"
+            "`bzinventory` hoặc `bzinv` - Xem khung đã sở hữu\n"
+        ),
+        inline=False
+    )
+    
+    # Info
+    embed.add_field(
+        name="💡 THÔNG TIN",
+        value=(
+            "• Trả lời đúng câu hỏi để nhận **1 điểm**\n"
+            "• Dùng điểm để mua khung đẹp trong shop\n"
+            "• Khung sẽ hiển thị khi bạn trả lời đúng\n"
+        ),
+        inline=False
+    )
+    
+    embed.set_footer(text="Crate: 🌸 Boizzzz 🗡 | Chúc bạn chơi vui vẻ!")
+    embed.set_thumbnail(url=bot.user.avatar.url if bot.user.avatar else None)
+    
+    await ctx.send(embed=embed)
+
+import os
+keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
 #add keep_alive for Render
+
 
 
 
